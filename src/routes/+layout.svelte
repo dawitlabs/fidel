@@ -15,6 +15,7 @@
 		// ScrollSmoother breaks native touch scroll — desktop only
 		const isTouch = window.matchMedia('(pointer: coarse)').matches;
 		if (!isTouch) {
+			document.documentElement.classList.add('smoother-active');
 			smoother = ScrollSmoother.create({
 				wrapper: '#smooth-wrapper',
 				content: '#smooth-content',
