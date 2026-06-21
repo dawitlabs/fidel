@@ -11,6 +11,7 @@
 	import { gsap, ScrollTrigger, MorphSVGPlugin } from '$lib/gsap/register';
 	import { ORDERS } from '$lib/data/fidel';
 	import glyphData from '$lib/data/glyphs.json';
+	import { speak, hasTTS } from '$lib/audio';
 
 	type GlyphsFile = { _note: string; glyphs: Record<string, { d: string; viewBox: string }> };
 	const glyphs = (glyphData as GlyphsFile).glyphs;
@@ -18,6 +19,7 @@
 	let container: HTMLElement;
 	let morphPath: SVGPathElement;
 	let activeIndex = $state(0);
+	let lastSpokenIndex = -1;
 
 	const currentOrder = $derived(ORDERS[activeIndex]);
 
@@ -66,6 +68,10 @@
 									Math.floor(self.progress * ORDERS.length),
 								);
 								activeIndex = idx;
+								if (idx !== lastSpokenIndex && hasTTS() && ORDERS[idx]) {
+									lastSpokenIndex = idx;
+									speak(ORDERS[idx]!.glyph);
+								}
 							},
 						},
 					});
@@ -135,15 +141,18 @@
 				</div>
 			{/if}
 
-			<!-- All 7 fidels as text strip — active one highlighted -->
+			<!-- All 7 fidels as text strip — active one highlighted, click to hear -->
 			<div class="flex gap-2 md:gap-3 mt-6 md:mt-8 flex-wrap" aria-label="The seven orders of ሀ">
 				{#each ORDERS as order, i}
-					<span
-						class="et-display text-2xl md:text-3xl transition-colors duration-300 {i === activeIndex
+					<button
+						type="button"
+						class="et-display text-2xl md:text-3xl transition-colors duration-300 cursor-pointer select-none bg-transparent border-none p-0 {i === activeIndex
 							? 'text-ink'
 							: 'text-border'}"
 						title="{order.sound} — {order.name}"
-					>{order.glyph}</span>
+						onclick={() => speak(order.glyph)}
+						aria-label="Play {order.sound}"
+					>{order.glyph}</button>
 				{/each}
 			</div>
 		</div>
