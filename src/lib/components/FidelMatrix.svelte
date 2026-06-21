@@ -8,14 +8,9 @@
 	import { t } from '$lib/i18n/index';
 	import { gsap, ScrollTrigger, SplitText } from '$lib/gsap/register';
 	import { MATRIX_ROWS, ORDERS } from '$lib/data/fidel';
-	import { speak, hasTTS } from '$lib/audio';
+	import { speak, hasAudio } from '$lib/audio';
 
 	let container: HTMLElement;
-	let ttsAvailable = $state(false);
-
-	$effect(() => {
-		ttsAvailable = hasTTS();
-	});
 
 	onMount(() => {
 		if (!browser) return;
@@ -145,13 +140,13 @@
 						data-cell
 						class="flex items-center justify-center py-3 et text-[clamp(1rem,2vw,1.5rem)] transition-colors duration-100 hover:text-ink text-ink-2
 						{i === 0 ? 'font-semibold et-display' : ''}
-						{ttsAvailable ? 'cursor-pointer select-none' : 'cursor-default'}"
+						{hasAudio(glyph) ? 'cursor-pointer select-none' : 'cursor-default'}"
 						role="cell"
-						tabindex={ttsAvailable ? 0 : undefined}
+						tabindex={hasAudio(glyph) ? 0 : undefined}
 						aria-label="{row.sound}{ORDERS[i]?.sound ?? ''}"
 						title="{ORDERS[i]?.name ?? ''}"
-						onclick={() => ttsAvailable && speak(glyph)}
-						onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && ttsAvailable && speak(glyph)}
+						onclick={() => speak(glyph)}
+						onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && speak(glyph)}
 					>
 						{glyph}
 					</div>

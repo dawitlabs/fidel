@@ -1,9 +1,9 @@
 <script lang="ts">
 	/**
 	 * Centerpiece: pinned scroll section.
-	 * As the user scrolls, MorphSVGPlugin tweens the SVG path
-	 * through all 7 vowel orders of ሀ → ሁ → ሂ → ሃ → ሄ → ህ → ሆ.
-	 * Labels update on each order.
+	 * MorphSVGPlugin tweens through all 7 vowel orders of ሀ → ሁ → ሂ → ሃ → ሄ → ህ → ሆ.
+	 * Paths are normalized to 2 subpaths so MorphSVG handles ሄ/ሆ (which have inner
+	 * counters) without producing garbage shapes.
 	 */
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
@@ -11,10 +11,18 @@
 	import { gsap, ScrollTrigger, MorphSVGPlugin } from '$lib/gsap/register';
 	import { ORDERS } from '$lib/data/fidel';
 	import glyphData from '$lib/data/glyphs.json';
-	import { speak, hasTTS } from '$lib/audio';
+	import { speak } from '$lib/audio';
 
 	type GlyphsFile = { _note: string; glyphs: Record<string, { d: string; viewBox: string }> };
 	const glyphs = (glyphData as GlyphsFile).glyphs;
+
+	// ሄ and ሆ have inner counters (2 subpaths). Normalize all paths to 2 subpaths
+	// by appending a degenerate moveto so MorphSVG can animate the counter in/out.
+	function normalizePath(d: string): string {
+		const count = (d.match(/[Mm]/g) ?? []).length;
+		if (count >= 2) return d;
+		return d + ' M 390 460 Z';
+	}
 
 	let container: HTMLElement;
 	let morphPath: SVGPathElement;
@@ -23,15 +31,19 @@
 
 	const currentOrder = $derived(ORDERS[activeIndex]);
 
+	const normalizedPaths = ORDERS.map((o) => normalizePath(glyphs[o.glyph]?.d ?? ''));
+	const initialPath = normalizedPaths[0] ?? '';
+
 	onMount(() => {
 		if (!browser) return;
 
-		const paths = ORDERS.map((o) => glyphs[o.glyph]?.d ?? '');
-
-		if (paths.some((p) => !p)) {
-			console.warn('OrdersScroll: missing glyph paths, falling back to static');
+		if (normalizedPaths.some((p) => !p)) {
+			console.warn('OrdersScroll: missing glyph paths');
 			return;
 		}
+
+		// Set the normalized starting path
+		if (morphPath) morphPath.setAttribute('d', initialPath);
 
 		const mm = gsap.matchMedia();
 
@@ -44,16 +56,12 @@
 				const { reduced } = ctx.conditions as { motion: boolean; reduced: boolean };
 
 				if (reduced) {
-					// Static: show final form
 					activeIndex = ORDERS.length - 1;
-					if (morphPath && paths[ORDERS.length - 1]) {
-						morphPath.setAttribute('d', paths[ORDERS.length - 1] ?? '');
-					}
+					if (morphPath) morphPath.setAttribute('d', normalizedPaths[ORDERS.length - 1] ?? '');
 					return;
 				}
 
 				const ctx2 = gsap.context(() => {
-					// Build a timeline with one morph tween per order transition
 					const tl = gsap.timeline({
 						scrollTrigger: {
 							trigger: container,
@@ -68,7 +76,7 @@
 									Math.floor(self.progress * ORDERS.length),
 								);
 								activeIndex = idx;
-								if (idx !== lastSpokenIndex && hasTTS() && ORDERS[idx]) {
+								if (idx !== lastSpokenIndex && ORDERS[idx]) {
 									lastSpokenIndex = idx;
 									speak(ORDERS[idx]!.glyph);
 								}
@@ -76,12 +84,11 @@
 						},
 					});
 
-					// Chain morph from each order to the next
-					for (let i = 1; i < paths.length; i++) {
-						const shape = paths[i];
+					for (let i = 1; i < normalizedPaths.length; i++) {
+						const shape = normalizedPaths[i];
 						if (!shape) continue;
 						tl.to(morphPath, {
-							morphSVG: { shape, type: 'rotational' },
+							morphSVG: { shape, type: 'linear' },
 							duration: 1,
 							ease: 'power1.inOut',
 						});
@@ -101,7 +108,6 @@
 	class="relative w-full"
 	aria-label="The seven Fidel orders"
 >
-	<!-- 100vh sticky viewport -->
 	<div class="min-h-[100dvh] flex flex-col md:flex-row items-center justify-between px-[var(--section-x)] py-28 md:py-0 gap-8 md:gap-12">
 
 		<!-- Left: labels -->
@@ -117,7 +123,6 @@
 				{$t.orders.heading}
 			</h2>
 
-			<!-- Order metadata — updates as morph progresses -->
 			{#if currentOrder}
 				<div class="space-y-4 border-t border-border pt-6">
 					<div class="flex justify-between items-baseline">
@@ -141,7 +146,6 @@
 				</div>
 			{/if}
 
-			<!-- All 7 fidels as text strip — active one highlighted, click to hear -->
 			<div class="flex gap-2 md:gap-3 mt-6 md:mt-8 flex-wrap" aria-label="The seven orders of ሀ">
 				{#each ORDERS as order, i}
 					<button
@@ -169,7 +173,7 @@
 			>
 				<path
 					bind:this={morphPath}
-					d={glyphs['ሀ']?.d ?? ''}
+					d={initialPath}
 					fill="currentColor"
 					stroke="none"
 				/>
@@ -177,7 +181,6 @@
 		</div>
 	</div>
 
-	<!-- Body copy below the pin area -->
 	<div class="px-[var(--section-x)] pb-[var(--section-y)] max-w-lg">
 		<p class="text-body text-muted leading-relaxed">
 			{$t.orders.body}
