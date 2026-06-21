@@ -7,19 +7,13 @@ import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 import { SplitText } from 'gsap/SplitText';
 import { Flip } from 'gsap/Flip';
 
-let registered = false;
-
-export function registerGSAP() {
-  if (!browser || registered) return;
-  gsap.registerPlugin(
-    ScrollTrigger,
-    ScrollSmoother,
-    DrawSVGPlugin,
-    MorphSVGPlugin,
-    SplitText,
-    Flip,
-  );
-  registered = true;
+// Register at module-load time so plugins are available when child components'
+// onMount callbacks fire (child onMount runs before parent/layout onMount).
+if (browser) {
+  gsap.registerPlugin(ScrollTrigger, ScrollSmoother, DrawSVGPlugin, MorphSVGPlugin, SplitText, Flip);
 }
+
+// Kept for backward compat — callers in layout.svelte still call this, now a no-op
+export function registerGSAP() {}
 
 export { gsap, ScrollTrigger, ScrollSmoother, DrawSVGPlugin, MorphSVGPlugin, SplitText, Flip };
