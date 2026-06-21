@@ -70,36 +70,52 @@ function loadFont(fontPath) {
 
 function extractGlyphs(font, chars, label) {
   const upem = font.unitsPerEm;
-  const scale = SIZE / upem;
-  const out = {};
 
+  // First pass: render each path and get its true SVG bounding box
+  const pathData = {};
   for (const char of chars) {
     const glyph = font.charToGlyph(char);
     if (!glyph || glyph.index === 0) {
       console.warn(`  ⚠  no glyph for '${char}' in ${label}`);
       continue;
     }
-
-    // Baseline at 80% of canvas height keeps ascenders inside the viewBox
+    // Baseline at 80% of canvas — keeps ascenders inside the viewBox
     const path = glyph.getPath(0, SIZE * 0.8, SIZE);
     const d = path.toPathData(3);
-    const bb = glyph.getBoundingBox();
+    // getBoundingBox() on the rendered Path gives true SVG-space bounds
+    const svgBBox = path.getBoundingBox();
+    pathData[char] = { d, svgBBox };
+    console.log(
+      `  ✓  '${char}'  (glyph ${glyph.index}) ` +
+      `bbox=(${svgBBox.x1.toFixed(0)},${svgBBox.y1.toFixed(0)})–(${svgBBox.x2.toFixed(0)},${svgBBox.y2.toFixed(0)})`
+    );
+  }
 
+  if (Object.keys(pathData).length === 0) return {};
+
+  // Compute a single shared viewBox that fits ALL glyphs — required for
+  // MorphSVGPlugin consistency (morphing changes path data, not the viewBox).
+  const bboxes = Object.values(pathData).map((p) => p.svgBBox);
+  const PAD = 24;
+  const vx = Math.floor(Math.min(...bboxes.map((b) => b.x1)) - PAD);
+  const vy = Math.floor(Math.min(...bboxes.map((b) => b.y1)) - PAD);
+  const vx2 = Math.ceil(Math.max(...bboxes.map((b) => b.x2)) + PAD);
+  const vy2 = Math.ceil(Math.max(...bboxes.map((b) => b.y2)) + PAD);
+  const sharedViewBox = `${vx} ${vy} ${vx2 - vx} ${vy2 - vy}`;
+  console.log(`\n  shared viewBox: "${sharedViewBox}"`);
+
+  const out = {};
+  for (const char of chars) {
+    if (!pathData[char]) continue;
+    const { d, svgBBox } = pathData[char];
     out[char] = {
       char,
       d,
       font: label,
       upem,
-      viewBox: `0 0 ${SIZE} ${SIZE}`,
-      // bbox in SVG coordinate space (Y flipped)
-      bbox: {
-        x1: +(bb.x1 * scale).toFixed(2),
-        y1: +((upem - bb.y2) * scale).toFixed(2),
-        x2: +(bb.x2 * scale).toFixed(2),
-        y2: +((upem - bb.y1) * scale).toFixed(2),
-      },
+      viewBox: sharedViewBox,
+      bbox: { x1: svgBBox.x1, y1: svgBBox.y1, x2: svgBBox.x2, y2: svgBBox.y2 },
     };
-    console.log(`  ✓  '${char}'  (glyph index ${glyph.index})`);
   }
   return out;
 }

@@ -28,14 +28,10 @@
 				}
 
 				const ctx2 = gsap.context(() => {
-					// 1. Draw the glyph outline
-					const path = container.querySelector('.hero-glyph path');
-					if (path) {
-						gsap.set(path, { drawSVG: '0%', fill: 'none' });
-						gsap
-							.timeline({ delay: 0.3 })
-							.to(path, { drawSVG: '100%', duration: 2, ease: 'power2.inOut' })
-							.to(path, { fill: 'currentColor', stroke: 'none', duration: 0.6, ease: 'power2.out' }, '-=0.2');
+					// 1. Background glyph scale in
+					const glyphEl = container.querySelector('.hero-glyph');
+					if (glyphEl) {
+						gsap.from(glyphEl, { scale: 0.92, autoAlpha: 0, duration: 1.2, ease: 'power2.out' });
 					}
 
 					// 2. Eyebrow fade in — no SplitText so locale changes work live
@@ -85,7 +81,7 @@
 
 <section
 	bind:this={container}
-	class="relative min-h-screen flex flex-col items-center justify-center px-[var(--section-x)] pt-24 pb-16 overflow-hidden"
+	class="relative min-h-[100dvh] flex flex-col items-center justify-center px-[var(--section-x)] pt-24 pb-16 overflow-hidden"
 	aria-label="Hero"
 >
 	<!-- Large background glyph — draw on via DrawSVG -->
@@ -95,9 +91,9 @@
 	>
 		<GlyphMorph
 			char="ሀ"
-			class="w-[70vmin] h-[70vmin] text-ink opacity-90"
+			class="w-[70vmin] h-[70vmin] text-ink opacity-[0.07]"
 			strokeWidth={8}
-			filled={false}
+			filled={true}
 		/>
 	</div>
 

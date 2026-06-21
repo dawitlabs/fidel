@@ -96,7 +96,7 @@
 	aria-label="The seven Fidel orders"
 >
 	<!-- 100vh sticky viewport -->
-	<div class="min-h-screen flex flex-col md:flex-row items-center justify-between px-[var(--section-x)] gap-12">
+	<div class="min-h-[100dvh] flex flex-col md:flex-row items-center justify-between px-[var(--section-x)] py-28 md:py-0 gap-8 md:gap-12">
 
 		<!-- Left: labels -->
 		<div class="flex-1 flex flex-col justify-center max-w-xs">
@@ -105,7 +105,7 @@
 			</p>
 
 			<h2
-				class="latin-display text-display leading-none mb-10"
+				class="latin-display text-heading md:text-display leading-none mb-6 md:mb-10"
 				style="font-kerning: none;"
 			>
 				{$t.orders.heading}
@@ -135,14 +135,15 @@
 				</div>
 			{/if}
 
-			<!-- Progress dots -->
-			<div class="flex gap-2 mt-8" aria-hidden="true">
+			<!-- All 7 fidels as text strip — active one highlighted -->
+			<div class="flex gap-2 md:gap-3 mt-6 md:mt-8 flex-wrap" aria-label="The seven orders of ሀ">
 				{#each ORDERS as order, i}
-					<div
-						class="w-1.5 h-1.5 rounded-full transition-colors duration-200 {i === activeIndex
-							? 'bg-ink'
-							: 'bg-border'}"
-					></div>
+					<span
+						class="et-display text-2xl md:text-3xl transition-colors duration-300 {i === activeIndex
+							? 'text-ink'
+							: 'text-border'}"
+						title="{order.sound} — {order.name}"
+					>{order.glyph}</span>
 				{/each}
 			</div>
 		</div>
@@ -152,7 +153,7 @@
 			<svg
 				viewBox={glyphs['ሀ']?.viewBox ?? '0 0 1000 1000'}
 				xmlns="http://www.w3.org/2000/svg"
-				class="w-[clamp(240px,45vmin,520px)] h-[clamp(240px,45vmin,520px)] text-ink"
+				class="w-[clamp(160px,38vmin,520px)] h-[clamp(160px,38vmin,520px)] text-ink"
 				aria-label={currentOrder?.glyph}
 				role="img"
 				style="will-change: transform;"

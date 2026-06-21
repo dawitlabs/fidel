@@ -91,14 +91,14 @@
 	<!-- Grid: 8 columns (1 label + 7 orders) -->
 	<div
 		data-grid
-		class="overflow-x-auto"
+		class="overflow-x-auto -mx-[var(--section-x)] px-[var(--section-x)]"
 		role="table"
 		aria-label="Fidel syllable matrix"
 	>
 		<!-- Column headers -->
 		<div
-			class="grid gap-px mb-2"
-			style="grid-template-columns: 3rem repeat(7, 1fr);"
+			class="grid gap-px mb-2 min-w-[32rem]"
+			style="grid-template-columns: 3rem repeat(7, minmax(3.5rem, 1fr));"
 			role="row"
 		>
 			<div
@@ -121,8 +121,8 @@
 		<!-- Rows -->
 		{#each MATRIX_ROWS as row}
 			<div
-				class="grid gap-px border-t border-border"
-				style="grid-template-columns: 3rem repeat(7, 1fr);"
+				class="grid gap-px border-t border-border min-w-[32rem]"
+				style="grid-template-columns: 3rem repeat(7, minmax(3.5rem, 1fr));"
 				role="row"
 			>
 				<!-- Row label -->
