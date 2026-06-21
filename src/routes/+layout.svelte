@@ -12,12 +12,16 @@
 		if (!browser) return;
 		registerGSAP();
 
-		smoother = ScrollSmoother.create({
-			wrapper: '#smooth-wrapper',
-			content: '#smooth-content',
-			smooth: 1.5,
-			effects: true,
-		});
+		// ScrollSmoother breaks native touch scroll — desktop only
+		const isTouch = window.matchMedia('(pointer: coarse)').matches;
+		if (!isTouch) {
+			smoother = ScrollSmoother.create({
+				wrapper: '#smooth-wrapper',
+				content: '#smooth-content',
+				smooth: 1.5,
+				effects: true,
+			});
+		}
 
 		// Refresh ScrollTrigger after Ethiopic fonts load to correct trigger positions
 		document.fonts.ready.then(() => {
