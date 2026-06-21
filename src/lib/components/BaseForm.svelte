@@ -5,6 +5,7 @@
 	import { gsap, ScrollTrigger, SplitText } from '$lib/gsap/register';
 	import GlyphMorph from './GlyphMorph.svelte';
 	import { ORDERS } from '$lib/data/fidel';
+	import { speak } from '$lib/audio';
 
 	let container: HTMLElement;
 
@@ -106,9 +107,23 @@
 				<span class="text-label tracking-widest uppercase text-muted">
 					{$t.base.label}
 				</span>
-				<span class="et text-xl text-muted" aria-label="Order 1">
-					{baseOrder?.numeral}
-				</span>
+				<div class="flex items-center gap-3">
+					<button
+						type="button"
+						onclick={() => speak('ሀ')}
+						class="text-muted hover:text-ink transition-colors duration-150 cursor-pointer"
+						aria-label="Play sound of ሀ"
+					>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+							<path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+							<path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+						</svg>
+					</button>
+					<span class="et text-xl text-muted" aria-label="Order 1">
+						{baseOrder?.numeral}
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
