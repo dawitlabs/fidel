@@ -1,0 +1,105 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/archivo';
+@import '@fontsource/abyssinica-sil/400.css';
+@import '@fontsource/noto-sans-ethiopic/400.css';
+@import '@fontsource/noto-sans-ethiopic/600.css';
+
+@theme {
+	/* Monochrome oklch ramp — ink on paper */
+	--color-ink: oklch(8% 0 0);
+	--color-ink-2: oklch(25% 0 0);
+	--color-muted: oklch(45% 0 0);
+	--color-border: oklch(82% 0 0);
+	--color-surface: oklch(94% 0 0);
+	--color-paper: oklch(97% 0 0);
+	--color-white: oklch(100% 0 0);
+	/* One whisper accent: warm off-white tint for order highlight */
+	--color-accent: oklch(88% 0.04 85);
+
+	/* Typography */
+	--font-latin: 'Archivo Variable', system-ui, sans-serif;
+	--font-ethiopic-display: 'Abyssinica SIL', 'Noto Sans Ethiopic', serif;
+	--font-ethiopic-body: 'Noto Sans Ethiopic', serif;
+
+	/* Type scale — clamp() fluid from 375px to 1440px */
+	--text-hero: clamp(5rem, 3rem + 8vw, 14rem);
+	--text-display: clamp(2.5rem, 1.5rem + 3.5vw, 6rem);
+	--text-heading: clamp(1.75rem, 1.25rem + 2vw, 3.5rem);
+	--text-sub: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+	--text-body: 1rem;
+	--text-small: 0.875rem;
+	--text-label: 0.6875rem;
+
+	/* Section spacing */
+	--section-y: clamp(5rem, 4rem + 5vw, 10rem);
+	--section-x: clamp(1.5rem, 1rem + 3vw, 5rem);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	font-size: 16px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	background: var(--color-paper);
+	color: var(--color-ink);
+}
+
+body {
+	font-family: var(--font-latin);
+	font-size: var(--text-body);
+	line-height: 1.65;
+	overflow-x: hidden;
+}
+
+/* Ethiopic text nodes use the Ethiopic body font */
+:lang(am),
+[lang='am'],
+.et {
+	font-family: var(--font-ethiopic-body);
+}
+
+/* Display Ethiopic — Abyssinica SIL */
+.et-display {
+	font-family: var(--font-ethiopic-display);
+}
+
+/* Latin display — tight tracking at large sizes */
+.latin-display {
+	font-family: var(--font-latin);
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	line-height: 1;
+}
+
+/* ScrollSmoother wrapper */
+#smooth-wrapper {
+	overflow: hidden;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+}
+
+#smooth-content {
+	overflow: visible;
+	width: 100%;
+}
+
+/* Reduced-motion: static fallback */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
